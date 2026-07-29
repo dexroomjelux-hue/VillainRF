@@ -1,4 +1,4 @@
-const fs = global.nodemodule["fs-extra"];
+Iconst fs = global.nodemodule["fs-extra"];
 module.exports.config = {
   name: "goibot",
   version: "1.0.1",
@@ -284,8 +284,17 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
      return api.sendMessage("️Khud hi karlona. tumhe kya kuch nhi ata h?", threadID);
    };
 
-   if ((event.body.toLowerCase() == "🙂") || (event.body.toLowerCase() == "🙃")) {
-     return api.sendMessage("️Man Toh Accha H Nhi. Kam  Se Kam Shakal Toh Accha Karlo Meri Jaan", threadID);
+      if ((event.body.toLowerCase() == "🙂")) {
+     var lines = [
+       "Man Toh Accha H Nhi. Kam Se Kam Shakal Toh Accha Karlo Meri Jaan 🙂",
+       "Itni masoomiyat? Kya chahiye tumhe mujhse? 😇",
+       "Muskurao, kyunki duniya mein smile ki bahut kami hai! 😊",
+       "Teri ye smile dekh kar toh mera din ban gaya! ✨",
+       "Smile karte raho, har mushkil ka hal mil jayega. 😉",
+       "Haste huye aap bahut acche lagte ho, aise hi raha karo! 🥰"
+     ];
+     var randomLine = lines[Math.floor(Math.random() * lines.length)];
+     return api.sendMessage(randomLine, threadID);
    };
 
   if ((event.body.toLowerCase() == "🤥") || (event.body.toLowerCase() == "🤥")) {
