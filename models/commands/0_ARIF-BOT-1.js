@@ -36,6 +36,10 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
      return api.sendMessage("Hug me baby ☺️", threadID);
    };
 
+  if ((event.body.toLowerCase() == "max") || (event.body.toLowerCase() == "lol bot")) {
+     return api.sendMessage("Owner-Mʌx Ghreebo Sy Baat Nahi Karta 😂", threadID);
+   };
+
    if ((event.body.toLowerCase() == "sim") || (event.body.toLowerCase() == "simsimi")) {
      return api.sendMessage("Prefix Kon Lagayega? Pehle Prefix Lagao Fir Likho Sim", threadID);
    };
