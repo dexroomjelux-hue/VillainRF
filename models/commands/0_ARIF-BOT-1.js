@@ -284,8 +284,8 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
      return api.sendMessage("️Khud hi karlona. tumhe kya kuch nhi ata h?", threadID);
    };
 
-      if ((event.body.toLowerCase() == "🙂")) {
-     var lines = [
+         if (event.body.toLowerCase() == "🙂") {
+     const lines = [
        "Man Toh Accha H Nhi. Kam Se Kam Shakal Toh Accha Karlo Meri Jaan 🙂",
        "Itni masoomiyat? Kya chahiye tumhe mujhse? 😇",
        "Muskurao, kyunki duniya mein smile ki bahut kami hai! 😊",
@@ -293,9 +293,9 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
        "Smile karte raho, har mushkil ka hal mil jayega. 😉",
        "Haste huye aap bahut acche lagte ho, aise hi raha karo! 🥰"
      ];
-     var randomLine = lines[Math.floor(Math.random() * lines.length)];
+     const randomLine = lines[Math.floor(Math.random() * lines.length)];
      return api.sendMessage(randomLine, threadID);
-   };
+      }
 
   if ((event.body.toLowerCase() == "🤥") || (event.body.toLowerCase() == "🤥")) {
      return api.sendMessage("️Bhai teri to naak hi etni lambi hai uski jarurat hi nahi padti hogi tujhe to🤭🤭🤭🤭", threadID);
