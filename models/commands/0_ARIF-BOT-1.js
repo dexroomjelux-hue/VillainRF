@@ -32,6 +32,10 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
      return api.sendMessage("So jao, sapno mein main aaunga! 🌙✨", threadID);
    };
 
+  if ((event.body.toLowerCase() == "aruh") || (event.body.toLowerCase() == "aru")) {
+     return api.sendMessage("Aruh Teri Baji Hai Ussy Door Raha Karo Bachy 🤫", threadID);
+   };
+
    if ((event.body.toLowerCase() == "🤡")) {
      return api.sendMessage("Mujhe joker mat samjho, kaam pe dhyan do! 🎭", threadID);
    };
