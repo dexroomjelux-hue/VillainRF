@@ -8,7 +8,7 @@
   "ADMINBOT": ["100001463657257"],
   "NDH": ["61572909482910"],
 
-  "adminOnly": false,
+  "adminOnly": true,
   "ndhOnly": false,
   "adminPaOnly": false,
 
