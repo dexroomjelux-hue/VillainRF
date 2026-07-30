@@ -1,29 +1,43 @@
 const fs = require("fs");
+const path = require("path");
+
 module.exports.config = {
   name: "Khana",
-    version: "1.1.1",
+  version: "1.1.1",
   hasPermssion: 0,
-  credits: "ARIF BABU", 
+  credits: "ARIF BABU",
   description: "Just Respond",
-  usePrefix: true,
+  usePrefix: true, 
   commandCategory: "no prefix",
-    cooldowns: 5, 
+  cooldowns: 5,
 };
 
-module.exports.handleEvent = function({ api, event, client, __GLOBAL }) {
-  var { threadID, messageID } = event;
-  let react = event.body.toLowerCase();
-  if(react.includes("KHANA") ||
-     react.includes("khana") || react.includes("lunch") || react.includes("kana") ||
-react.includes("dinner") ||
-react.includes("kha lo")) {
-    var msg = {
-        body: `𝐘𝐀 𝐋𝐎 𝐁𝐀𝐁𝐔 𝐊𝐇𝐀𝐍𝐀 𝐊𝐇𝐀 𝐋𝐎 😁`,attachment: fs.createReadStream(__dirname + `/ARIF-BABU/KHANA.gif`)
-      }
-      api.sendMessage(msg, threadID, messageID);
-    api.setMessageReaction("🍲", event.messageID, (err) => {}, true)
-    }
-  }
-  module.exports.run = function({ api, event, client, __GLOBAL }) {
+module.exports.handleEvent = async function({ api, event }) {
+  const { threadID, messageID, body } = event;
+  if (!body) return;
 
+  const react = body.toLowerCase();
+  
+  // Triggers ki list
+  const triggers = ["khana", "lunch", "kana", "dinner", "kha lo"];
+  
+  // Check karta hai agar message mein koi trigger hai
+  if (triggers.some(t => react.includes(t))) {
+    const pathToGif = path.join(__dirname, "ARIF-BABU", "KHANA.gif");
+
+    // File exist karti hai to attachment bhej warna sirf text
+    if (fs.existsSync(pathToGif)) {
+      api.sendMessage({
+        body: `𝐘𝐀 𝐋𝐎 𝐁𝐀𝐁𝐔 𝐊𝐇𝐀𝐍𝐀 𝐊𝐇𝐀 𝐋𝐎 😁`,
+        attachment: fs.createReadStream(pathToGif)
+      }, threadID, messageID);
+    } else {
+      api.sendMessage(`𝐘𝐀 𝐋𝐎 𝐁𝐀𝐁𝐔 𝐊𝐇𝐀𝐍𝐀 𝐊𝐇𝐀 𝐋𝐎 😁`, threadID, messageID);
+    }
+
+    // Reaction
+    api.setMessageReaction("🍲", event.messageID, (err) => {}, true);
   }
+};
+
+module.exports.run = function({ api, event, client, __GLOBAL }) {};
