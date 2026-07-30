@@ -1,48 +1,65 @@
-* ========= HARD CREATOR LOCK ========= */
+/* ========= HARD CREATOR LOCK ========= */
 const CREATOR_NAME = "ARIF BABU";
 
 module.exports.config = {
   name: "uns",
-  version: "1.0.4",
+  version: "1.0.5", // Version update
   hasPermssion: 0,
   credits: "ARIF BABU",
-  description: "मैसेज को अनसेंड करें (prefix + no prefix)",
+  description: "Unsend bot messages",
   commandCategory: "system",
-  usages: "reply + uns / 👍 / unsend / #uns",
+  usages: "reply + uns",
   cooldowns: 0,
-  usePrefix: true // ✅ IMPORTANT (PREFIX FIX)
+  usePrefix: false // Prefix hataya taake simple message se bhi chale
 };
 
-// 🔒 CREDIT PROTECTION
 if (module.exports.config.credits !== CREATOR_NAME) {
-  throw new Error("❌ Credits changed! Command locked by ARIF BABU.");
+  throw new Error("Credits changed! Command locked by ARIF BABU.");
 }
 
 module.exports.languages = {
-  hi: {
-    returnCant: "📌 aap Kisi aur ka bheja hua message unsent nahin kar sakte 😉",
-    missingReply: "📌 jis message ko unsent karna hai, kripya usi per reply karen 😉"
+  en: {
+    returnCant: "⚠️ Aap sirf meri bheji hui messages ko unsend kar sakte hain.",
+    missingReply: "⚠️ Reply karen us message par jise unsend karna hai."
   }
 };
 
-/* ========= NO PREFIX ========= */
-async run({ api, event, send }) {
-    const { messageReply } = event;
-    
-    if (!messageReply) {
-      return send.reply('Please reply to a message to unsend.');
+/* ========= HANDLE EVENT (No Prefix) ========= */
+module.exports.handleEvent = async function ({ api, event, getText }) {
+  // Check agar message reply hai aur body exist karti hai
+  if (!event.messageReply || !event.body) return;
+
+  const body = event.body.toLowerCase().trim();
+  const triggerWords = ["uns", "unsend", ".", "delete"]; // Aap yahan aur words daal sakte hain
+
+  if (triggerWords.includes(body)) {
+    // Check: Kya reply wala message bot ka hai?
+    if (event.messageReply.senderID !== api.getCurrentUserID()) {
+      return api.sendMessage(getText("returnCant"), event.threadID, event.messageID);
     }
-    
-    const botID = api.getCurrentUserID();
-    
-    if (messageReply.senderID !== botID) {
-      return send.reply('I can only unsend my own messages.');
-    }
-    
+
     try {
-      await api.unsendMessage(messageReply.messageID);
-    } catch (error) {
-      return send.reply('Failed to unsend message.');
+      return api.unsendMessage(event.messageReply.messageID);
+    } catch (e) {
+      console.error("UNSEND ERROR:", e);
     }
+  }
+};
+
+/* ========= PREFIX COMMAND (Run) ========= */
+module.exports.run = async function ({ api, event, getText }) {
+  if (!event.messageReply) {
+    return api.sendMessage(getText("missingReply"), event.threadID, event.messageID);
+  }
+
+  if (event.messageReply.senderID !== api.getCurrentUserID()) {
+    return api.sendMessage(getText("returnCant"), event.threadID, event.messageID);
+  }
+
+  try {
+    return api.unsendMessage(event.messageReply.messageID);
+  } catch (e) {
+    console.error("UNSEND ERROR:", e);
+    api.sendMessage("❌ Error: Message unsend nahi ho saka.", event.threadID, event.messageID);
   }
 };
