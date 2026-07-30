@@ -3,7 +3,7 @@ module.exports.config = {
   version: "1.0.5",
   hasPermssion: 0,
   credits: "ARIF BABU",
-  description: "THIS BOT IS MR ARIF BABU",
+  description: "THIS BOT IS OWNER MAX",
   usePrefix: true,
   commandCategory: "BOT-COMMAND-LIST",
   usages: "[page | command name]",
@@ -96,7 +96,7 @@ module.exports.run = async function ({ api, event, args, getText }) {
 PAGE [${page}/${Math.ceil(arrayInfo.length / numberOfOnePage)}]
 COMMAND DETAIL: ${prefix}help <command>
 
-🤖 THIS BOT IS MADE BY MR ARIF BABU 🙂
+🤖 THIS BOT IS MADE BY OWNER MAX 🫰
 `;
 
   return api.sendMessage(msg, threadID, messageID);
