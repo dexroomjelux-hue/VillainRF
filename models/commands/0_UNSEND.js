@@ -26,52 +26,23 @@ module.exports.languages = {
 };
 
 /* ========= NO PREFIX ========= */
-module.exports.handleEvent = async function ({ api, event, getText }) {
-  try {
-    if (!event.body || event.type !== "message_reply") return;
-
-    const body = event.body.toLowerCase();
-
-    if (
-      body === "uns" ||
-      body === "unsend" ||
-      body === "👍" ||
-      body === "🤦" ||
-      body === "."
-    ) {
-      if (event.messageReply.senderID !== api.getCurrentUserID()) {
-        return api.sendMessage(
-          getText("returnCant"),
-          event.threadID,
-          event.messageID
-        );
-      }
-
-      return api.unsendMessage(event.messageReply.messageID);
+async run({ api, event, send }) {
+    const { messageReply } = event;
+    
+    if (!messageReply) {
+      return send.reply('Please reply to a message to unsend.');
     }
-  } catch (e) {
-    console.log("UNSEND ERROR:", e);
+    
+    const botID = api.getCurrentUserID();
+    
+    if (messageReply.senderID !== botID) {
+      return send.reply('I can only unsend my own messages.');
+    }
+    
+    try {
+      await api.unsendMessage(messageReply.messageID);
+    } catch (error) {
+      return send.reply('Failed to unsend message.');
+    }
   }
-};
-
-/* ========= PREFIX COMMAND ========= */
-module.exports.run = function ({ api, event, getText }) {
-
-  if (event.type !== "message_reply") {
-    return api.sendMessage(
-      getText("missingReply"),
-      event.threadID,
-      event.messageID
-    );
-  }
-
-  if (event.messageReply.senderID !== api.getCurrentUserID()) {
-    return api.sendMessage(
-      getText("returnCant"),
-      event.threadID,
-      event.messageID
-    );
-  }
-
-  return api.unsendMessage(event.messageReply.messageID);
 };
