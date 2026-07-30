@@ -123,7 +123,7 @@ module.exports.run = async function ({ api, event, args, getText }) {
   // Footer
   msg += `PAGE [ ${page}/${maxPage} ]\n`;
   msg += `Type: ${prefix}help2 <command name>\n`;
-  msg += `BOT BY OWNER MAX 🫰`;
+  msg += `🤖 THIS BOT MADE BY OWNER MAX 🫰`;
 
   // Send message
   return api.sendMessage(msg, threadID, async (err, info) => {
