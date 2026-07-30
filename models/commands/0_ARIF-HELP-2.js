@@ -66,12 +66,12 @@ module.exports.run = async function ({ api, event, args, getText }) {
   const { commands } = global.client;
   const { threadID, messageID } = event;
 
-  const config =
-    global.configModule?.[this.config.name] || this.config.envConfig;
+  const config = global.configModule?.[this.config.name] || this.config.envConfig;
   const { autoUnsend, delayUnsend } = config;
 
   const prefix = global.config.PREFIX;
 
+  // Agar user ne specific command likhi hai, to wahi dikhaye
   const cmd = commands.get((args[0] || "").toLowerCase());
   if (cmd) {
     return api.sendMessage(
@@ -94,40 +94,26 @@ module.exports.run = async function ({ api, event, args, getText }) {
     );
   }
 
-  /* ===== COMMAND LIST ===== */
-  const page = parseInt(args[0]) || 1;
-  const perPage = 20;
-
+  /* ===== ALL COMMANDS LIST (No Pages) ===== */
   const list = [...commands.keys()].sort();
-  const maxPage = Math.ceil(list.length / perPage);
 
-  const start = (page - 1) * perPage;
-  const end = start + perPage;
-  const slice = list.slice(start, end);
-
-  // ✅ Build the full message
   let msg = "╭──────── ★ ────────╮\n";
   msg += "📄 FULL COMMAND LIST\n";
+  msg += `Total Commands: ${list.length}\n`;
   msg += "╰──────── ★ ────────╯\n\n";
 
-  // Box start
   msg += "┏━━━━━━━━━━━━━━━┓\n";
-
-  slice.forEach((name, index) => {
-    msg += `┃ ${start + index + 1}. ${prefix}${name}\n`;
+  list.forEach((name, index) => {
+    msg += `┃ ${index + 1}. ${prefix}${name}\n`;
   });
-
-  // Box end
   msg += "┗━━━━━━━━━━━━━━━┛\n\n";
 
-  // Footer
-  msg += `PAGE [ ${page}/${maxPage} ]\n`;
   msg += `Type: ${prefix}help2 <command name>\n`;
   msg += `🤖 THIS BOT MADE BY OWNER MAX 🫰`;
 
   // Send message
   return api.sendMessage(msg, threadID, async (err, info) => {
-    if (autoUnsend) {
+    if (autoUnsend && info) {
       await new Promise((r) => setTimeout(r, delayUnsend * 1000));
       api.unsendMessage(info.messageID);
     }
