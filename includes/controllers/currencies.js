@@ -30,7 +30,9 @@ module.exports = function ({ models }) {
 	async function setData(userID, options = {}) {
 		if (typeof options != 'object' && !Array.isArray(options)) throw global.getText("currencies", "needObject");
 		try {
-			(await Currencies.findOne({ where: { userID } })).update(options);
+			const user = await Currencies.findOne({ where: { userID } });
+			if (!user) return false; // Check agar user exist karta hai
+			await user.update(options);
 			return true;
 		} 
 		catch (error) {
@@ -41,7 +43,9 @@ module.exports = function ({ models }) {
 
 	async function delData(userID) {
 		try {
-			(await Currencies.findOne({ where: { userID } })).destroy();
+			const user = await Currencies.findOne({ where: { userID } });
+			if (!user) return false; // Check agar user exist karta hai
+			await user.destroy();
 			return true;
 		}
 		catch (error) {
@@ -65,8 +69,9 @@ module.exports = function ({ models }) {
 	async function increaseMoney(userID, money) {
 		if (typeof money != 'number') throw global.getText("currencies", "needNumber");
 		try {
-			let balance = (await getData(userID)).money;
-			await setData(userID, { money: balance + money });
+			const data = await getData(userID);
+			if (!data) return false; // User exist nahi karta to ruk jao
+			await setData(userID, { money: data.money + money });
 			return true;
 		}
 		catch (error) {
@@ -78,7 +83,9 @@ module.exports = function ({ models }) {
 	async function decreaseMoney(userID, money) {
 		if (typeof money != 'number') throw global.getText("currencies", "needNumber");
 		try {
-			let balance = (await getData(userID)).money;
+			const data = await getData(userID);
+			if (!data) return false; // User exist nahi karta
+			let balance = data.money;
 			if (balance < money) return false;
 			await setData(userID, { money: balance - money });
 			return true;
