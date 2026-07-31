@@ -16,7 +16,6 @@ module.exports.config = {
 module.exports.handleEvent = async function ({ api, event, Currencies, Users, Threads }) {
   const { threadID, senderID } = event;
   
-  // 1. Thread check: Kya rankup is thread mein ON hai?
   const threadData = (await Threads.getData(threadID)).data || {};
   if (threadData.rankup === false) return;
 
@@ -24,7 +23,6 @@ module.exports.handleEvent = async function ({ api, event, Currencies, Users, Th
   const axios = global.nodemodule["axios"];
   const { createCanvas, loadImage } = require("canvas");
 
-  // 2. EXP Update logic
   let dataExp = (await Currencies.getData(senderID)) || {};
   let exp = dataExp.exp || 0;
   exp += 1;
@@ -32,37 +30,38 @@ module.exports.handleEvent = async function ({ api, event, Currencies, Users, Th
   const curLevel = Math.floor((Math.sqrt(1 + (4 * exp / 3)) + 1) / 2);
   const oldLevel = Math.floor((Math.sqrt(1 + (4 * (exp - 1) / 3)) + 1) / 2);
 
-  // Sirf tabhi photo bhejein agar level badha ho
   if (curLevel > oldLevel) {
     const name = await Users.getNameUser(senderID);
-    
-    // Avatar fetch
     const info = await api.getUserInfo(senderID);
     const avatarURL = info[senderID].profileUrl;
     const avatarData = await axios.get(avatarURL, { responseType: "arraybuffer" });
     const avatar = await loadImage(Buffer.from(avatarData.data));
 
-    // Canvas Draw
     const canvas = createCanvas(1200, 500);
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#020b0a"; // Background
+    
+    // Background
+    ctx.fillStyle = "#020b0a";
     ctx.fillRect(0, 0, 1200, 500);
     
-    // Draw Avatar
+    // Avatar Drawing Fix
+    ctx.save(); // Pura state save karein
     ctx.beginPath();
     ctx.arc(240, 250, 130, 0, Math.PI * 2);
     ctx.closePath();
-    ctx.clip();
+    ctx.clip(); // Sirf is circle par clipping apply hogi
     ctx.drawImage(avatar, 110, 120, 260, 260);
-    ctx.restore();
+    ctx.restore(); // Clipping khatam kar dein taake text dikhe
 
-    // Text
+    // Text Drawing
     ctx.font = "bold 72px Sans";
     ctx.fillStyle = "#ffffff";
     ctx.fillText("LEVEL UP!", 430, 150);
+    
     ctx.font = "bold 48px Sans";
     ctx.fillStyle = "#22ff88";
     ctx.fillText(name, 430, 225);
+    
     ctx.font = "38px Sans";
     ctx.fillStyle = "#ffffff";
     ctx.fillText(`Aap level ${curLevel} par pohanch gaye hain!`, 430, 290);
@@ -77,7 +76,6 @@ module.exports.handleEvent = async function ({ api, event, Currencies, Users, Th
     );
   }
 
-  // Database update
   await Currencies.setData(senderID, { exp });
 };
 
