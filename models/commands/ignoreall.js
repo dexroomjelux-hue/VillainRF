@@ -2,7 +2,7 @@ module.exports.config = {
   name: "ignoreall",
   version: "1.0.0",
   hasPermssion: 2, // 2 ka matlab Admin/Owner hi use kar sakta hai
-  credits: "ARIF BABU",
+  credits: "OWNER-MAX",
   description: "Sabhi users ko ignore karne ke liye",
   commandCategory: "Admin",
   usages: "ignoreall [on/off]",
