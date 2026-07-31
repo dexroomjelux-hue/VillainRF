@@ -12,7 +12,7 @@ module.exports.config = {
 };
 
 // Yahan apni Facebook ID daalein
-const ADMIN_ID = "YOUR_FACEBOOK_ID_HERE"; 
+const ADMIN_ID = "100001463657257"; 
 
 module.exports.run = async function({ api, event, args }) {
   const { senderID, threadID, messageID } = event;
