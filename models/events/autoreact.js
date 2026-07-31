@@ -7,7 +7,7 @@ const REACTS = [
 
 module.exports = {
   config: {
-    credits: "SARDAR RDX",
+    credits: "ARIF BABU",
     name: "autoreact",
     eventType: "message",
     description: "Groups mein auto react — har message pe random pyara emoji."
