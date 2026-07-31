@@ -17,7 +17,7 @@
   "NOTIFICATION": true,
 
   "autoClean": true,
-  "commandDisabled": ["sim.js"],
+  "commandDisabled": [],
   "eventDisabled": ["join.js"],
 
   "DATABASE": {
