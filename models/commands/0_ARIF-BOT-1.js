@@ -193,7 +193,7 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
      return api.sendMessage("Main Hun Naw Jaaneman ❤️", threadID);
    };
 
-   if ((event.body.toLowerCase() == "max") || (event.body.toLowerCase() == "owner max") || (event.body.toLowerCase() == "max") || (event.body.toLowerCase() == "owner")) {
+   if ((event.body.toLowerCase() == "max") || (event.body.toLowerCase() == "owner max") || (event.body.toLowerCase() == "max") || (event.body.toLowerCase() == "ownermax")) {
      return api.sendMessage( "Owner-Max Busy HoGa Work Me Main t0o Hun Naw 😘",threadID);
 
        
