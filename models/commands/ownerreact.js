@@ -1,6 +1,6 @@
 module.exports = {
   config: {
-    credits: "SARDAR RDX",
+    credits: "ARIF BABU",
     name: "ownerreact",
     aliases: ["or", "ownerr"],
     description: "Owner auto react on/off karein.",
