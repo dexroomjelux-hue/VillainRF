@@ -10,14 +10,16 @@ module.exports.config = {
 
 module.exports.run = async function({ api, event }) {
   const msg = await api.sendMessage(
-    "✨ **TRUTH OR DARE GAME** ✨\n\n" +
-    "Aap Truth ya Dare mein se kya chunnoge?\n" +
-    "Reply mein 'Truth' ya 'Dare' likhein.",
+    "╭─── ✨ 𝐓𝐑𝐔𝐓𝐇 𝐎𝐑 𝐃𝐀𝐑𝐄 ✨ ───╮\n\n" +
+    "✨ Aap Kya Chuna Chahenge? ✨\n\n" +
+    "💠 Reply Karein:\n" +
+    "『 𝐓 』 ya 『 𝐓𝐫𝐮𝐭𝐡 』\n" +
+    "『 𝐃 』 ya 『 𝐃𝐚𝐫𝐞 』\n\n" +
+    "╰──────── 🎮 ────────╯",
     event.threadID,
     event.messageID
   );
   
-  // Is messageID ko global client mein save karte hain taaki reply handle ho sake
   global.client.handleReply.push({
     name: this.config.name,
     messageID: msg.messageID,
@@ -32,15 +34,19 @@ module.exports.handleReply = async function({ api, event, handleReply }) {
   
   const choice = event.body.toLowerCase();
   
-  if (choice === "truth") {
+  // Variation check
+  const isTruth = ["t", "truth"].includes(choice);
+  const isDare = ["d", "dare"].includes(choice);
+  
+  if (isTruth) {
     const truth = data.truth[Math.floor(Math.random() * data.truth.length)];
-    return api.sendMessage(`🤔 Aapka Truth hai:\n"${truth}"`, event.threadID, event.messageID);
+    return api.sendMessage(`🤔 𝐘𝐨𝐮𝐫 𝐓𝐫𝐮𝐭𝐡:\n"${truth}"`, event.threadID, event.messageID);
   } 
-  else if (choice === "dare") {
+  else if (isDare) {
     const dare = data.dare[Math.floor(Math.random() * data.dare.length)];
-    return api.sendMessage(`🔥 Aapka Dare hai:\n"${dare}"`, event.threadID, event.messageID);
+    return api.sendMessage(`🔥 𝐘𝐨𝐮𝐫 𝐃𝐚𝐫𝐞:\n"${dare}"`, event.threadID, event.messageID);
   } 
   else {
-    return api.sendMessage("❌ Invalid choice! Sirf 'Truth' ya 'Dare' likhein.", event.threadID, event.messageID);
+    return api.sendMessage("❌ Invalid! Sirf 'T' ya 'D' likhein.", event.threadID, event.messageID);
   }
 };
