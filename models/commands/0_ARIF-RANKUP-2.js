@@ -1,81 +1,69 @@
 module.exports.config = {
   name: "ARIF-RANKUP-CARD",
-  version: "10.1.0-HD-WHITE",
-  hasPermssion: 1,
-  credits: "ARIF BABU",
-  description: "HD VIP Rankup Card (White Text)",
+  version: "12.0.0-FUTURISTIC",
+  hasPermssion: 0, // Change to 0 for normal members
+  credits: "ARIF BABU", // ⚠️ CREDIT PROTECTION
+  description: "Futuristic VIP Rankup Card System",
   commandCategory: "LEVEL UP",
   dependencies: {
-    "canvas": "",
-    "axios": "",
-    "fs-extra": ""
+    "fs-extra": "",
+    "axios": "" // Axios zaroori hai agar humein user ka name ya profile pic bhi handle karna ho baad mein
   },
-  cooldowns: 2
+  cooldowns: 5
 };
+
+// ⛔ CREDIT PROTECTION — DO NOT TOUCH
+module.exports.onLoad = function () {
+  const fs = require("fs");
+  const path = __filename;
+  const fileData = fs.readFileSync(path, "utf8");
+
+  if (!fileData.includes('credits: "ARIF BABU"')) {
+    console.log("\n❌ ERROR: Credits Badle Gaye Hain! File Disabled ❌\n");
+    process.exit(1);
+  }
+};
+// ---------------------
 
 module.exports.handleEvent = async function ({ api, event, Currencies, Users, Threads }) {
   const { threadID, senderID } = event;
   
+  // 1. Thread check: Kya rankup is thread mein ON hai?
   const threadData = (await Threads.getData(threadID)).data || {};
   if (threadData.rankup === false) return;
 
   const fs = global.nodemodule["fs-extra"];
-  const axios = global.nodemodule["axios"];
-  const { createCanvas, loadImage } = require("canvas");
+  const pathCache = __dirname + "/cache/rankup.png";
 
+  // Check karein ke rankup.png cache folder mein exist karta hai ya nahi
+  if (!fs.existsSync(pathCache)) {
+    console.log("❌ ARIF-RANKUP-CARD Error: rankup.png not found in cache folder.");
+    return;
+  }
+
+  // 2. EXP Update logic
   let dataExp = (await Currencies.getData(senderID)) || {};
   let exp = dataExp.exp || 0;
-  exp += 1;
+  exp += 1; // Har message par +1 EXP
   
+  // Level formula (Math.sqrt(1 + (4 * exp / 3)) + 1) / 2)
   const curLevel = Math.floor((Math.sqrt(1 + (4 * exp / 3)) + 1) / 2);
   const oldLevel = Math.floor((Math.sqrt(1 + (4 * (exp - 1) / 3)) + 1) / 2);
 
+  // Sirf tabhi photo bhejein agar level badha ho
   if (curLevel > oldLevel) {
     const name = await Users.getNameUser(senderID);
-    const info = await api.getUserInfo(senderID);
-    const avatarURL = info[senderID].profileUrl;
-    const avatarData = await axios.get(avatarURL, { responseType: "arraybuffer" });
-    const avatar = await loadImage(Buffer.from(avatarData.data));
-
-    const canvas = createCanvas(1200, 500);
-    const ctx = canvas.getContext("2d");
     
-    // Background
-    ctx.fillStyle = "#020b0a";
-    ctx.fillRect(0, 0, 1200, 500);
-    
-    // Avatar Drawing Fix
-    ctx.save(); // Pura state save karein
-    ctx.beginPath();
-    ctx.arc(240, 250, 130, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip(); // Sirf is circle par clipping apply hogi
-    ctx.drawImage(avatar, 110, 120, 260, 260);
-    ctx.restore(); // Clipping khatam kar dein taake text dikhe
+    // Futuristic design ke hisab se message ka format
+    const msg = {
+      body: `✨ SYSTEM ALERT: NEW PROTOCOL REACHED ✨\n\n🤵 Subject: ${name}\n⚡ Status: LEVEL ${curLevel}\n🌐 Location: SECURE NET\n\n🚀 G A T E W A Y   O P E N E D 🚀`,
+      attachment: fs.createReadStream(pathCache)
+    };
 
-    // Text Drawing
-    ctx.font = "bold 72px Sans";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText("LEVEL UP!", 430, 150);
-    
-    ctx.font = "bold 48px Sans";
-    ctx.fillStyle = "#22ff88";
-    ctx.fillText(name, 430, 225);
-    
-    ctx.font = "38px Sans";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(`Aap level ${curLevel} par pohanch gaye hain!`, 430, 290);
-
-    const imgPath = __dirname + "/cache/rankup.png";
-    fs.writeFileSync(imgPath, canvas.toBuffer());
-
-    api.sendMessage(
-      { body: `🎉 CONGRATS ${name}! Aapka Level ${curLevel} ho gaya hai! 🔥`, attachment: fs.createReadStream(imgPath) },
-      threadID,
-      () => fs.unlinkSync(imgPath)
-    );
+    api.sendMessage(msg, threadID);
   }
 
+  // Database update
   await Currencies.setData(senderID, { exp });
 };
 
@@ -83,11 +71,17 @@ module.exports.run = async function ({ api, event, Threads }) {
   const { threadID } = event;
   let data = (await Threads.getData(threadID)).data || {};
   
-  data.rankup = data.rankup === false ? true : false;
+  // Toggle rankup status for the specific group
+  if (typeof data.rankup === 'undefined') {
+      data.rankup = false; // Default OFF
+  } else {
+      data.rankup = !data.rankup; // Switch ON/OFF
+  }
+
   await Threads.setData(threadID, { data });
   
   return api.sendMessage(
-    data.rankup ? "👑 VIP Rankup Card ON ho gaya!" : "❌ VIP Rankup Card OFF ho gaya!",
+    data.rankup ? "👑 VIP Futuristic Rankup Card ON ho gaya!" : "❌ VIP Futuristic Rankup Card OFF ho gaya!",
     threadID
   );
 };
