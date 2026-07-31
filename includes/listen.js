@@ -5,9 +5,6 @@ module.exports = function ({ api, models }) {
     const Currencies = require("./controllers/currencies")({ models });
     const logger = require("../utils/log.js");
     const moment = require("moment-timezone");
-    const axios = require("axios");
-
-    /* ================= STYLE BOX ================= */
 
     const box = (title, body) =>
 `╭─── ${title} ───╮
@@ -16,7 +13,7 @@ ${body}
 
 ╰─────────────────╯`;
 
-    let day = moment.tz("Asia/Kolkata").day();
+    let day = moment.tz("Asia/Karachi").day();
     const checkttDataPath = __dirname + '/../models/commands/checktuongtac/';
 
     /* ================= DAILY / WEEKLY TOP ================= */
@@ -43,28 +40,16 @@ ${body}
                         storage.push({ ...item, name });
                     }
 
-                    storage.sort((a, b) =>
-                        b.count - a.count || a.name.localeCompare(b.name)
-                    );
+                    storage.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
-                    const body = storage.slice(0, 10)
-                        .map(i => `${count++}. ${i.name} → ${i.count} msgs`)
-                        .join("\n");
+                    const body = storage.slice(0, 10).map(i => `${count++}. ${i.name} → ${i.count} msgs`).join("\n");
 
-                    api.sendMessage(
-                        box("🔥 DAILY TOP CHAT", body),
-                        checkttFile.replace(".json", "")
-                    );
+                    api.sendMessage(box("🔥 DAILY TOP CHAT", body), checkttFile.replace(".json", ""));
 
                     checktt.day.forEach(e => e.count = 0);
                     checktt.time = day_now;
-                    fs.writeFileSync(
-                        checkttDataPath + checkttFile,
-                        JSON.stringify(checktt, null, 4)
-                    );
+                    fs.writeFileSync(checkttDataPath + checkttFile, JSON.stringify(checktt, null, 4));
                 }
-
-                /* ========== WEEKLY RESET ========== */
 
                 if (day_now === 1) {
                     for (const checkttFile of checkttData) {
@@ -76,31 +61,20 @@ ${body}
                             storage.push({ ...item, name });
                         }
 
-                        storage.sort((a, b) =>
-                            b.count - a.count || a.name.localeCompare(b.name)
-                        );
+                        storage.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
-                        const body = storage.slice(0, 10)
-                            .map(i => `${count++}. ${i.name} → ${i.count} msgs`)
-                            .join("\n");
+                        const body = storage.slice(0, 10).map(i => `${count++}. ${i.name} → ${i.count} msgs`).join("\n");
 
-                        api.sendMessage(
-                            box("👑 WEEKLY TOP CHAT", body),
-                            checkttFile.replace(".json", "")
-                        );
+                        api.sendMessage(box("👑 WEEKLY TOP CHAT", body), checkttFile.replace(".json", ""));
 
                         checktt.week.forEach(e => e.count = 0);
-                        fs.writeFileSync(
-                            checkttDataPath + checkttFile,
-                            JSON.stringify(checktt, null, 4)
-                        );
+                        fs.writeFileSync(checkttDataPath + checkttFile, JSON.stringify(checktt, null, 4));
                     }
                 }
-
                 global.client.sending_top = false;
             }
         } catch (e) {
-            console.error(e);
+            console.error("Interval Error:", e);
         }
     }, 1000 * 10);
 
@@ -109,7 +83,6 @@ ${body}
     (async function () {
         try {
             logger("Loading environment...", "[ SYSTEM ]");
-
             const threads = await Threads.getAll();
             const users = await Users.getAll(["userID", "name", "data"]);
             const currencies = await Currencies.getAll(["userID"]);
@@ -120,26 +93,18 @@ ${body}
                 global.data.threadData.set(id, t.data || {});
                 global.data.threadInfo.set(id, t.threadInfo || {});
             }
-
             for (const u of users) {
                 const id = String(u.userID);
                 global.data.allUserID.push(id);
                 if (u.name) global.data.userName.set(id, u.name);
             }
-
             for (const c of currencies)
                 global.data.allCurrenciesID.push(String(c.userID));
-
             logger("Environment loaded successfully", "[ SYSTEM ]");
         } catch (err) {
-            logger("Failed to load environment", "ERROR");
+            logger("Failed to load environment: " + err, "ERROR");
         }
     })();
-
-    logger(
-        `[ ${global.config.PREFIX} ] • ${global.config.BOTNAME || ""}`,
-        "[ BOT ONLINE ]"
-    );
 
     /* ================= HANDLERS ================= */
 
@@ -154,7 +119,6 @@ ${body}
 
     return (event) => {
         switch (event.type) {
-
             case "message":
             case "message_reply":
             case "message_unsend":
@@ -168,33 +132,19 @@ ${body}
                 handleEvent({ event });
                 break;
 
-            // 🔥 ADMIN ❌ REACTION → BOT MESSAGE UNSEND (FIXED)
             case "message_reaction": {
                 try {
-                    const BOT_ID = api.getCurrentUserID();
-                    const ADMIN_IDS = [
-                        ...(global.config.ADMINBOT || []),
-                        ...(global.config.NDH || [])
-                    ];
-
+                    const ADMIN_IDS = [...(global.config.ADMINBOT || []), ...(global.config.NDH || [])];
                     const ALLOWED_REACTIONS = ["😉", "❤️", "😡", "🙄"];
 
-                    if (
-                        !event.messageID ||
-                        !event.reaction ||
-                        !ADMIN_IDS.includes(event.userID) ||
-                        !ALLOWED_REACTIONS.includes(event.reaction)
-                    ) return;
-
-                    // sirf bot ke message par
-                    if (event.senderID && event.senderID !== BOT_ID) return;
-
-                    api.unsendMessage(event.messageID);
-
+                    if (event.messageID && event.reaction && ADMIN_IDS.includes(event.userID)) {
+                        if (ALLOWED_REACTIONS.includes(event.reaction)) {
+                            api.unsendMessage(event.messageID).catch(err => {});
+                        }
+                    }
                 } catch (err) {
-                    console.error("Reaction unsend error:", err);
+                    console.error("Reaction handler error:", err);
                 }
-
                 handleReaction({ event });
                 break;
             }
