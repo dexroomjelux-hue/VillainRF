@@ -17,17 +17,21 @@ module.exports.run = async function ({ api, event }) {
     const { threadID, logMessageData } = event;
 
     const time = new Date().toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata"
+      timeZone: "Asia/Karachi"
     });
 
     const botName = global.config.BOTNAME || "ARIF BABU BOT";
 
     /* 🖼️ IMGUR LINKS */
     const imgurLinks = [
-      "https://i.imgur.com/AI8zow3.jpg",
-      "https://i.imgur.com/0grK57V.jpg",
-      "https://i.imgur.com/AI8zow3.jpg",
-      "https://i.imgur.com/0grK57V.jpg"
+      "https://i.ibb.co/7NR8XTX9/20260731-020746.jpg",
+      "https://i.ibb.co/r2kFyvZ9/20260731-020808.jpg",
+      "https://i.ibb.co/V0Yg6HdT/20260731-020832.jpg",
+      "https://i.ibb.co/mVJDWNxc/20260731-020843.jpg",
+      "https://i.ibb.co/3mrx7ZHf/20260731-020903.jpg",
+      "https://i.ibb.co/27CcM1vc/20260731-020923.jpg",
+      "https://i.ibb.co/twnsg9Fs/20260731-020938.jpg",
+      "https://i.ibb.co/0RyJ1t5S/20260731-020953.jpg"
     ];
 
     const imgPath = __dirname + "/cache/join.jpg";
@@ -58,7 +62,7 @@ module.exports.run = async function ({ api, event }) {
 ┃ ⏰ Time    : ${time}
 ┗━━━━━━━━━━━━━━━┛
 
-Owner : MR ARIF BABU ❤️
+Owner : OWNER-MAX 🫰
 Type #help`,
               attachment: fs.createReadStream(imgPath)
             },
