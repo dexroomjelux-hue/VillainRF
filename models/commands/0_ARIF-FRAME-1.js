@@ -1,9 +1,9 @@
 module.exports.config = {
     name: "fram",
-    version: "7.3.2",
+    version: "7.3.3",
     hasPermssion: 0,
     credits: "ARIF BABU", 
-    description: "FIXED VERSION",
+    description: "FIXED VERSION WITHOUT TOKEN",
     commandCategory: "PROFILE DP FRAME",
     usages: "PREFIX MENTIONS or REPLY",
     cooldowns: 5,
@@ -33,19 +33,19 @@ async function makeImage({ one, two }) {
     const __root = path.resolve(__dirname, "cache", "canvas");
 
     let batgiam_img = await jimp.read(__root + "/frame.jpeg");
-    let pathImg = __root + `/batman${one}_${two}.png`;
+    let pathImg = __root + `/frame_${one}_${two}.png`;
     let avatarOne = __root + `/avt_${one}.png`;
     let avatarTwo = __root + `/avt_${two}.png`;
     
-    // Direct URL se image fetch kar rahe hain
-    const getAvatar = async (uid) => {
-        const url = `https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
-        const response = await axios.get(url, { responseType: 'arraybuffer' });
-        return response.data;
+    // Yahan hum bina token ke image fetch kar rahe hain
+    const getAvatar = async (uid, path) => {
+        const url = `https://graph.facebook.com/${uid}/picture?width=512&height=512`;
+        const response = await axios({ url, responseType: 'arraybuffer' });
+        fs.writeFileSync(path, Buffer.from(response.data, 'binary'));
     };
 
-    fs.writeFileSync(avatarOne, Buffer.from(await getAvatar(one)));
-    fs.writeFileSync(avatarTwo, Buffer.from(await getAvatar(two)));
+    await getAvatar(one, avatarOne);
+    await getAvatar(two, avatarTwo);
     
     let circleOne = await jimp.read(await circle(avatarOne));
     let circleTwo = await jimp.read(await circle(avatarTwo));
@@ -73,18 +73,14 @@ module.exports.run = async function ({ event, api, args }) {
     
     const mention = Object.keys(event.mentions);
     const replyID = event.messageReply ? event.messageReply.senderID : null;
-
     const targetID = mention[0] || replyID;
 
-    if (!targetID) {
-        return api.sendMessage("❌ Please kisi ko mention karo ya phir kisi ke message par reply karo.", threadID, messageID);
-    }
+    if (!targetID) return api.sendMessage("❌ Kisi ko mention karo ya message par reply karo.", threadID, messageID);
 
     try {
         const path = await makeImage({ one: senderID, two: targetID });
         api.sendMessage({ attachment: fs.createReadStream(path) }, threadID, () => fs.unlinkSync(path), messageID);
     } catch (e) {
-        console.error("Error in Fram Command:", e);
-        api.sendMessage("❌ Error: Image nahi ban payi. Shayad ID invalid hai ya API limit khatam ho gayi hai.", threadID, messageID);
+        api.sendMessage("❌ Error: Avatar download nahi ho saka. User ID check karein.", threadID, messageID);
     }
 }
