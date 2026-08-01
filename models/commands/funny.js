@@ -1,20 +1,18 @@
 module.exports.config = {
     name: "funny",
-    version: "1.2.0",
+    version: "1.2.1",
     hasPermssion: 0,
     credits: "AI Collaborator",
-    description: "Specific user ko auto-reply karne ke liye",
+    description: "Specific user ko reply ke saath auto-reply karne ke liye",
     commandCategory: "FUN",
     usages: "Automatic on reply",
     cooldowns: 5
 };
 
-// Yeh function har msg par check karega
 module.exports.handleEvent = async function ({ event, api }) {
     const { threadID, senderID, messageID } = event;
-    const targetID = "100001463657257"; // Jis user ko tang karna hai
+    const targetID = "100001463657257"; 
 
-    // Agar message us target user ka hai
     if (senderID === targetID) {
         const specialMsgs = [
             "Oh ho! 61591532501919 ji, phir aa gaye? 😂",
@@ -26,12 +24,13 @@ module.exports.handleEvent = async function ({ event, api }) {
 
         const randomMsg = specialMsgs[Math.floor(Math.random() * specialMsgs.length)];
         
-        // Cooldown check (taaki bot har millisecond spam na kare)
-        // Yahan aap `api.sendMessage` use karein
-        api.sendMessage(randomMsg, threadID, messageID);
+        // Yeh line wahi messageID use karegi jo usne bheja hai, isliye yeh seedha reply jayega
+        api.sendMessage({ 
+            body: randomMsg 
+        }, threadID, (err, info) => {}, messageID); 
     }
 };
 
 module.exports.run = async function ({ event, api }) {
-    api.sendMessage("Auto-reply mode active hai! Jab woh user msg karega, bot reply dega.", event.threadID);
+    api.sendMessage("Auto-reply mode active hai! Ab bot us user ke message ka reply dega.", event.threadID);
 }
