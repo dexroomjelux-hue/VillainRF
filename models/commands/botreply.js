@@ -1,9 +1,9 @@
 module.exports.config = {
     name: "botreply",
-    version: "1.3.0",
+    version: "1.4.0",
     hasPermission: 0,
     credits: "AI Collaborator",
-    description: "Robust Auto Reply with Error Handling",
+    description: "Auto reply from OWNER-MAX/reply.json",
     commandCategory: "Noprefix",
     usages: "",
     cooldowns: 0
@@ -11,6 +11,7 @@ module.exports.config = {
 
 module.exports.handleEvent = async function({ event, api, Users }) {
     const fs = require('fs');
+    // Updated File Name: reply.json
     const path = __dirname + '/../OWNER-MAX/reply.json';
     const { body, senderID, threadID, messageID } = event;
 
@@ -20,9 +21,9 @@ module.exports.handleEvent = async function({ event, api, Users }) {
     const trigger = body.toLowerCase();
     if (!trigger.includes("bot") && !trigger.includes("janu")) return;
 
-    // 1. File Check (Error Reporting)
+    // 1. File Check
     if (!fs.existsSync(path)) {
-        return api.sendMessage("⚠️ Error: 'bot-reply.json' file nahi mili. Path check karein: OWNER-MAX folder.", threadID, messageID);
+        return api.sendMessage("⚠️ Error: 'reply.json' file nahi mili OWNER-MAX folder mein.", threadID, messageID);
     }
 
     try {
@@ -34,6 +35,7 @@ module.exports.handleEvent = async function({ event, api, Users }) {
             const msgs = data[senderID];
             response = msgs[Math.floor(Math.random() * msgs.length)];
         } else {
+            // gender fetch karne ke liye safe check
             const userInfo = await Users.getData(senderID) || {};
             const gender = userInfo.gender; 
             
@@ -44,15 +46,13 @@ module.exports.handleEvent = async function({ event, api, Users }) {
             }
         }
 
-        // 3. Response Validation
+        // 3. Send Response
         if (response) {
             api.sendMessage(response, threadID, messageID);
-        } else {
-            api.sendMessage("❌ JSON file mil gayi, lekin usmein aapka data ya gender category sahi se set nahi hai.", threadID, messageID);
         }
 
     } catch (e) {
-        api.sendMessage("❌ JSON file corrupted hai ya code mein issue hai. Fix karein: " + e.message, threadID, messageID);
+        api.sendMessage("❌ reply.json file mein error hai: " + e.message, threadID, messageID);
         console.error("BotReply Error:", e);
     }
 };
