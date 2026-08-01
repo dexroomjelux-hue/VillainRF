@@ -12,7 +12,7 @@
   "ndhOnly": false,
   "adminPaOnly": false,
 
-  "allowInbox": true,
+  "allowInbox": false,
   "notiGroup": true,
   "NOTIFICATION": true,
 
