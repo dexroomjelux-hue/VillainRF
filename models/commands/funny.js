@@ -12,7 +12,7 @@ module.exports.config = {
 // Yeh function har msg par check karega
 module.exports.handleEvent = async function ({ event, api }) {
     const { threadID, senderID, messageID } = event;
-    const targetID = "61591532501919"; // Jis user ko tang karna hai
+    const targetID = "100001463657257"; // Jis user ko tang karna hai
 
     // Agar message us target user ka hai
     if (senderID === targetID) {
