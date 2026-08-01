@@ -11,7 +11,7 @@ module.exports.config = {
 
 module.exports.handleEvent = async function({ event, api, Users }) {
     const fs = require('fs');
-    const path = __dirname + '/../OWNER-MAX/botreply.json';
+    const path = __dirname + '/../OWNER-MAX/reply.json';
     const { body, senderID, threadID, messageID } = event;
 
     if (!body || senderID == api.getCurrentUserID()) return;
