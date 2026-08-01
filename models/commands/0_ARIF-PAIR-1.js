@@ -1,9 +1,9 @@
 module.exports.config = {
   name: "pair",
-  version: "4.1.0",
+  version: "4.2.0",
   hasPermssion: 0,
-  credits: "ARIF BABU ",
-  description: "Hum Tum pair dp (blue ring style)",
+  credits: "ARIF BABU",
+  description: "Special Pair DP Style",
   usePrefix: true,
   commandCategory: "Giải trí",
   usages: "[reply | mention | random]",
@@ -34,15 +34,13 @@ module.exports.run = async function ({ api, event, Users }) {
   if (event.messageReply?.senderID) {
     id2 = event.messageReply.senderID;
   } else if (event.mentions && Object.keys(event.mentions).length === 1) {
-    id2 = Object.keys(event.mentions)[0];
+    id2 = Object.keys(event.mentions).reduce((a, b) => b);
   } else {
     const info = await api.getThreadInfo(event.threadID);
     let members = info.participantIDs.filter(id => id !== id1 && id !== api.getCurrentUserID());
     if (!members.length) return api.sendMessage("❌ Group me koi aur member nahi hai.", event.threadID, event.messageID);
     id2 = members[Math.floor(Math.random() * members.length)];
   }
-
-  if (!id2) return api.sendMessage("❌ Pair nahi mila.", event.threadID, event.messageID);
 
   const name2 = await Users.getNameUser(id2);
   const token = "6628568379|c1e620fa708a1d5696fb991c1bde5662";
@@ -58,13 +56,13 @@ module.exports.run = async function ({ api, event, Users }) {
   const canvas = createCanvas(W, H);
   const ctx = canvas.getContext("2d");
 
-  // ===== BACKGROUND IMAGE SECTION =====
-  const bgLink = "https://i.ibb.co/Z69THHG8/20260801-122103.jpg"; // Yahan link replace karein
+  // ===== NEW BACKGROUND =====
+  const bgLink = "https://i.ibb.co/Z69THHG8/20260801-122103.jpg";
   try {
       const bgImage = await loadImage(bgLink);
       ctx.drawImage(bgImage, 0, 0, W, H);
   } catch (e) {
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, W, H);
   }
 
@@ -82,25 +80,25 @@ module.exports.run = async function ({ api, event, Users }) {
   blueRing(ctx, x1, y, r + 10);
   blueRing(ctx, x2, y, r + 10);
 
+  // ===== NEW SPECIAL TEXT =====
   ctx.textAlign = "center";
-  ctx.font = "bold 110px Arial";
-  ctx.fillStyle = "#ffffff"; // Text color white kiya taaki kisi bhi BG pe dikhe
-  ctx.fillText("I", W / 2 - 140, 160);
-  ctx.fillStyle = "red";
-  ctx.fillText("❤", W / 2, 160);
+  
+  // Upar ka text
+  ctx.font = "bold 120px Arial";
   ctx.fillStyle = "#ffffff";
-  ctx.fillText("YOU", W / 2 + 170, 160);
+  ctx.fillText("Forever Together", W / 2, 200);
 
-  ctx.font = "bold 160px Arial";
-  ctx.fillText("Húm Túm", W / 2, H - 120);
+  // Niche ka text
+  ctx.font = "bold 140px Arial";
+  ctx.fillStyle = "#FFD700"; // Gold Color
+  ctx.fillText("Best Duo", W / 2, H - 120);
 
   fs.writeFileSync(outPath, canvas.toBuffer("image/png"));
   fs.unlinkSync(a1Path);
   fs.unlinkSync(a2Path);
 
   return api.sendMessage({
-      body: `${name1} ᥫ᭡ ${name2}`,
-      mentions: [{ id: id2, tag: name2 }],
+      body: `✨ ${name1} & ${name2} ✨`,
       attachment: fs.createReadStream(outPath)
   }, event.threadID, () => fs.unlinkSync(outPath), event.messageID);
 };
