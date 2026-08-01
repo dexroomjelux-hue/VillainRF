@@ -1,9 +1,9 @@
 module.exports.config = {
   name: "pair",
-  version: "4.2.0",
+  version: "4.2.1",
   hasPermssion: 0,
   credits: "ARIF BABU",
-  description: "Special Pair DP Style",
+  description: "Special Pair DP Style with Loading Animation",
   usePrefix: true,
   commandCategory: "Giải trí",
   usages: "[reply | mention | random]",
@@ -19,6 +19,23 @@ module.exports.run = async function ({ api, event, Users }) {
   const { createCanvas, loadImage } = require("canvas");
   const fs = require("fs-extra");
   const axios = require("axios");
+
+    // 🎞️ Pair DP Loading Frames
+  const frames = [
+    "🔍 ▱▱▱▱▱▱▱▱▱▱ 0% Processing",
+    "💖 ▰▱▱▱▱▱▱▱▱▱ 10% Finding Match...",
+    "🔗 ▰▰▰▱▱▱▱▱▱▱ 30% Linking Profiles...",
+    "🎨 ▰▰▰▰▰▱▱▱▱▱ 50% Styling Canvas...",
+    "✨ ▰▰▰▰▰▰▰▱▱▱ 80% Generating DP...",
+    "✅ ▰▰▰▰▰▰▰▰▰▰ 100% Completed!"
+  ];
+
+  // Frame animation start
+  const loading = await api.sendMessage("🔍 Loading resources...", event.threadID);
+  for (const f of frames) {
+    await new Promise(r => setTimeout(r, 400));
+    await api.editMessage(f, loading.messageID);
+  }
 
   const cache = __dirname + "/cache/";
   if (!fs.existsSync(cache)) fs.mkdirSync(cache, { recursive: true });
@@ -45,62 +62,64 @@ module.exports.run = async function ({ api, event, Users }) {
   const name2 = await Users.getNameUser(id2);
   const token = "6628568379|c1e620fa708a1d5696fb991c1bde5662";
 
-  const av1 = await axios.get(`https://graph.facebook.com/${id1}/picture?type=large&access_token=${token}`, { responseType: "arraybuffer" });
-  fs.writeFileSync(a1Path, av1.data);
-
-  const av2 = await axios.get(`https://graph.facebook.com/${id2}/picture?type=large&access_token=${token}`, { responseType: "arraybuffer" });
-  fs.writeFileSync(a2Path, av2.data);
-
-  const W = 1920;
-  const H = 1080;
-  const canvas = createCanvas(W, H);
-  const ctx = canvas.getContext("2d");
-
-  // ===== NEW BACKGROUND =====
-  const bgLink = "https://i.ibb.co/Z69THHG8/20260801-122103.jpg";
   try {
-      const bgImage = await loadImage(bgLink);
-      ctx.drawImage(bgImage, 0, 0, W, H);
-  } catch (e) {
-      ctx.fillStyle = "#000000";
-      ctx.fillRect(0, 0, W, H);
+    const av1 = await axios.get(`https://graph.facebook.com/${id1}/picture?type=large&access_token=${token}`, { responseType: "arraybuffer" });
+    fs.writeFileSync(a1Path, av1.data);
+
+    const av2 = await axios.get(`https://graph.facebook.com/${id2}/picture?type=large&access_token=${token}`, { responseType: "arraybuffer" });
+    fs.writeFileSync(a2Path, av2.data);
+
+    const W = 1920;
+    const H = 1080;
+    const canvas = createCanvas(W, H);
+    const ctx = canvas.getContext("2d");
+
+    const bgLink = "https://i.ibb.co/Z69THHG8/20260801-122103.jpg";
+    const bgImage = await loadImage(bgLink);
+    ctx.drawImage(bgImage, 0, 0, W, H);
+
+    const img1 = await loadImage(a1Path);
+    const img2 = await loadImage(a2Path);
+
+    const r = 230;
+    const y = H / 2;
+    const x1 = W * 0.3;
+    const x2 = W * 0.7;
+
+    drawCircle(ctx, img1, x1, y, r);
+    drawCircle(ctx, img2, x2, y, r);
+
+    blueRing(ctx, x1, y, r + 10);
+    blueRing(ctx, x2, y, r + 10);
+
+    ctx.textAlign = "center";
+    ctx.font = "bold 120px Arial";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("Forever Together", W / 2, 200);
+
+    ctx.font = "bold 140px Arial";
+    ctx.fillStyle = "#FFD700";
+    ctx.fillText("Best Duo", W / 2, H - 120);
+
+    fs.writeFileSync(outPath, canvas.toBuffer("image/png"));
+    
+    // Animation cleanup
+    await api.unsendMessage(loading.messageID);
+
+    return api.sendMessage({
+        body: `✨ ${name1} & ${name2} ✨`,
+        attachment: fs.createReadStream(outPath)
+    }, event.threadID, () => {
+        fs.unlinkSync(outPath);
+        fs.unlinkSync(a1Path);
+        fs.unlinkSync(a2Path);
+    }, event.messageID);
+
+  } catch (err) {
+    api.unsendMessage(loading.messageID);
+    api.sendMessage("❌ Error: Image generate karne mein problem aayi.", event.threadID);
+    console.error(err);
   }
-
-  const img1 = await loadImage(a1Path);
-  const img2 = await loadImage(a2Path);
-
-  const r = 230;
-  const y = H / 2;
-  const x1 = W * 0.3;
-  const x2 = W * 0.7;
-
-  drawCircle(ctx, img1, x1, y, r);
-  drawCircle(ctx, img2, x2, y, r);
-
-  blueRing(ctx, x1, y, r + 10);
-  blueRing(ctx, x2, y, r + 10);
-
-  // ===== NEW SPECIAL TEXT =====
-  ctx.textAlign = "center";
-  
-  // Upar ka text
-  ctx.font = "bold 120px Arial";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("Forever Together", W / 2, 200);
-
-  // Niche ka text
-  ctx.font = "bold 140px Arial";
-  ctx.fillStyle = "#FFD700"; // Gold Color
-  ctx.fillText("Best Duo", W / 2, H - 120);
-
-  fs.writeFileSync(outPath, canvas.toBuffer("image/png"));
-  fs.unlinkSync(a1Path);
-  fs.unlinkSync(a2Path);
-
-  return api.sendMessage({
-      body: `✨ ${name1} & ${name2} ✨`,
-      attachment: fs.createReadStream(outPath)
-  }, event.threadID, () => fs.unlinkSync(outPath), event.messageID);
 };
 
 function drawCircle(ctx, img, x, y, r) {
