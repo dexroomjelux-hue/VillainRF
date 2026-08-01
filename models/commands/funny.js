@@ -1,9 +1,9 @@
 module.exports.config = {
     name: "funny",
-    version: "1.2.1",
+    version: "1.2.2",
     hasPermssion: 0,
     credits: "AI Collaborator",
-    description: "Specific user ko reply ke saath auto-reply karne ke liye",
+    description: "Target user ke naam ke saath auto-reply",
     commandCategory: "FUN",
     usages: "Automatic on reply",
     cooldowns: 5
@@ -14,23 +14,28 @@ module.exports.handleEvent = async function ({ event, api }) {
     const targetID = "100001463657257"; 
 
     if (senderID === targetID) {
-        const specialMsgs = [
-            "Oh ho! 61591532501919 ji, phir aa gaye? 😂",
-            "Aapka reply toh aise aata hai jaise koi VIP aa gaya ho! 🤡",
-            "61591532501919, aapka fan club abhi tak nahi khula? ✍️",
-            "Baat toh aise kar rahe ho jaise group aapke baap ka hai! 😜",
-            "Bhai, thoda rest karlo, itna mat bolo! 😂"
-        ];
+        // Name fetch karne ka function
+        api.getUserInfo(senderID, (err, info) => {
+            if (err) return;
+            const userName = info[senderID].name;
 
-        const randomMsg = specialMsgs[Math.floor(Math.random() * specialMsgs.length)];
-        
-        // Yeh line wahi messageID use karegi jo usne bheja hai, isliye yeh seedha reply jayega
-        api.sendMessage({ 
-            body: randomMsg 
-        }, threadID, (err, info) => {}, messageID); 
+            const specialMsgs = [
+                `Oh ho! ${userName} ji, phir aa gaye? 😂`,
+                `Aapka reply toh aise aata hai jaise koi VIP aa gaya ho, ${userName}! 🤡`,
+                `${userName}, aapka fan club abhi tak nahi khula? ✍️`,
+                `Baat toh aise kar rahe ho jaise group aapke baap ka hai, ${userName}! 😜`,
+                `Bhai ${userName}, thoda rest karlo, itna mat bolo! 😂`
+            ];
+
+            const randomMsg = specialMsgs[Math.floor(Math.random() * specialMsgs.length)];
+            
+            api.sendMessage({ 
+                body: randomMsg 
+            }, threadID, messageID); 
+        });
     }
 };
 
 module.exports.run = async function ({ event, api }) {
-    api.sendMessage("Auto-reply mode active hai! Ab bot us user ke message ka reply dega.", event.threadID);
+    api.sendMessage("Auto-reply mode active hai! Ab bot user ka naam use karega.", event.threadID);
 }
