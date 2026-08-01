@@ -12,7 +12,7 @@ module.exports.config = {
 module.exports.handleEvent = async function({ event, api, Users }) {
     const fs = require('fs');
     // Path check karein, agar folder galat hai toh sahi karein
-    const path = __dirname + '/ARIF-BABU/bot-reply.json';
+    const path = __dirname + '/OWNER-MAX/bot-reply.json';
     
     if (!fs.existsSync(path)) return;
     const data = JSON.parse(fs.readFileSync(path, 'utf8'));
