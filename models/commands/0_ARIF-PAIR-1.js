@@ -31,58 +31,42 @@ module.exports.run = async function ({ api, event, Users }) {
   const name1 = await Users.getNameUser(id1);
 
   let id2;
-
   if (event.messageReply?.senderID) {
     id2 = event.messageReply.senderID;
-  }
-
-  else if (event.mentions && Object.keys(event.mentions).length === 1) {
+  } else if (event.mentions && Object.keys(event.mentions).length === 1) {
     id2 = Object.keys(event.mentions)[0];
-  }
-
-  else {
+  } else {
     const info = await api.getThreadInfo(event.threadID);
-    let members = info.participantIDs.filter(
-      id => id !== id1 && id !== api.getCurrentUserID()
-    );
-    if (!members.length)
-      return api.sendMessage(
-        "❌ Group me koi aur member nahi hai.",
-        event.threadID,
-        event.messageID
-      );
+    let members = info.participantIDs.filter(id => id !== id1 && id !== api.getCurrentUserID());
+    if (!members.length) return api.sendMessage("❌ Group me koi aur member nahi hai.", event.threadID, event.messageID);
     id2 = members[Math.floor(Math.random() * members.length)];
   }
 
-  if (!id2)
-    return api.sendMessage("❌ Pair nahi mila.", event.threadID, event.messageID);
+  if (!id2) return api.sendMessage("❌ Pair nahi mila.", event.threadID, event.messageID);
 
   const name2 = await Users.getNameUser(id2);
-
-  // ===== FACEBOOK TOKEN (FIXED) =====
   const token = "6628568379|c1e620fa708a1d5696fb991c1bde5662";
 
-  // ===== DOWNLOAD AVATARS =====
-  const av1 = await axios.get(
-    `https://graph.facebook.com/${id1}/picture?type=large&access_token=${token}`,
-    { responseType: "arraybuffer" }
-  );
+  const av1 = await axios.get(`https://graph.facebook.com/${id1}/picture?type=large&access_token=${token}`, { responseType: "arraybuffer" });
   fs.writeFileSync(a1Path, av1.data);
 
-  const av2 = await axios.get(
-    `https://graph.facebook.com/${id2}/picture?type=large&access_token=${token}`,
-    { responseType: "arraybuffer" }
-  );
+  const av2 = await axios.get(`https://graph.facebook.com/${id2}/picture?type=large&access_token=${token}`, { responseType: "arraybuffer" });
   fs.writeFileSync(a2Path, av2.data);
 
-  // ===== CANVAS =====
   const W = 1920;
   const H = 1080;
   const canvas = createCanvas(W, H);
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, W, H);
+  // ===== BACKGROUND IMAGE SECTION =====
+  const bgLink = "https://i.ibb.co/Z69THHG8/20260801-122103.jpg"; // Yahan link replace karein
+  try {
+      const bgImage = await loadImage(bgLink);
+      ctx.drawImage(bgImage, 0, 0, W, H);
+  } catch (e) {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, W, H);
+  }
 
   const img1 = await loadImage(a1Path);
   const img2 = await loadImage(a2Path);
@@ -98,17 +82,15 @@ module.exports.run = async function ({ api, event, Users }) {
   blueRing(ctx, x1, y, r + 10);
   blueRing(ctx, x2, y, r + 10);
 
-  // ===== TOP TEXT =====
   ctx.textAlign = "center";
   ctx.font = "bold 110px Arial";
-  ctx.fillStyle = "#000000";
+  ctx.fillStyle = "#ffffff"; // Text color white kiya taaki kisi bhi BG pe dikhe
   ctx.fillText("I", W / 2 - 140, 160);
   ctx.fillStyle = "red";
   ctx.fillText("❤", W / 2, 160);
-  ctx.fillStyle = "#000000";
+  ctx.fillStyle = "#ffffff";
   ctx.fillText("YOU", W / 2 + 170, 160);
 
-  // ===== BOTTOM TEXT =====
   ctx.font = "bold 160px Arial";
   ctx.fillText("Húm Túm", W / 2, H - 120);
 
@@ -116,19 +98,12 @@ module.exports.run = async function ({ api, event, Users }) {
   fs.unlinkSync(a1Path);
   fs.unlinkSync(a2Path);
 
-  return api.sendMessage(
-    {
+  return api.sendMessage({
       body: `${name1} ᥫ᭡ ${name2}`,
       mentions: [{ id: id2, tag: name2 }],
       attachment: fs.createReadStream(outPath)
-    },
-    event.threadID,
-    () => fs.unlinkSync(outPath),
-    event.messageID
-  );
+  }, event.threadID, () => fs.unlinkSync(outPath), event.messageID);
 };
-
-// ================= FUNCTIONS =================
 
 function drawCircle(ctx, img, x, y, r) {
   ctx.save();
