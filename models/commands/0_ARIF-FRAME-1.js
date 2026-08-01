@@ -1,17 +1,17 @@
 module.exports.config = {
     name: "fram",
-    version: "7.3.1",
+    version: "7.3.2",
     hasPermssion: 0,
     credits: "ARIF BABU", 
-    description: "THIS BOT WAS MADE BY MR ARIF BABU",
+    description: "FIXED VERSION",
     commandCategory: "PROFILE DP FRAME",
     usages: "PREFIX MENTIONS or REPLY",
     cooldowns: 5,
     dependencies: {
-        "axios": "",
-        "fs-extra": "",
-        "path": "",
-        "jimp": ""
+        "axios": "latest",
+        "fs-extra": "latest",
+        "path": "latest",
+        "jimp": "latest"
     }
 };
 
@@ -33,27 +33,29 @@ async function makeImage({ one, two }) {
     const __root = path.resolve(__dirname, "cache", "canvas");
 
     let batgiam_img = await jimp.read(__root + "/frame.jpeg");
-    let pathImg = __root + `/batman${one}_${two}.jpeg`;
-    let avatarOne = __root + `/avt_${one}.jpeg`;
-    let avatarTwo = __root + `/avt_${two}.jpeg`;
+    let pathImg = __root + `/batman${one}_${two}.png`;
+    let avatarOne = __root + `/avt_${one}.png`;
+    let avatarTwo = __root + `/avt_${two}.png`;
     
-    // WARNING: Apka Access Token yahan hardcoded hai, ise secure rakhein!
-    let getAvatarOne = (await axios.get(`https://graph.facebook.com/${one}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
-    fs.writeFileSync(avatarOne, Buffer.from(getAvatarOne, 'utf-8'));
-    
-    let getAvatarTwo = (await axios.get(`https://graph.facebook.com/${two}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
-    fs.writeFileSync(avatarTwo, Buffer.from(getAvatarTwo, 'utf-8'));
+    // Direct URL se image fetch kar rahe hain
+    const getAvatar = async (uid) => {
+        const url = `https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        return response.data;
+    };
+
+    fs.writeFileSync(avatarOne, Buffer.from(await getAvatar(one)));
+    fs.writeFileSync(avatarTwo, Buffer.from(await getAvatar(two)));
     
     let circleOne = await jimp.read(await circle(avatarOne));
     let circleTwo = await jimp.read(await circle(avatarTwo));
     
     batgiam_img.composite(circleOne.resize(230, 230), 540, 120).composite(circleTwo.resize(350, 350), 65, 65);
     
-    let raw = await batgiam_img.getBufferAsync("image/jpeg");
+    await batgiam_img.writeAsync(pathImg);
     
-    fs.writeFileSync(pathImg, raw);
-    fs.unlinkSync(avatarOne);
-    fs.unlinkSync(avatarTwo);
+    if(fs.existsSync(avatarOne)) fs.unlinkSync(avatarOne);
+    if(fs.existsSync(avatarTwo)) fs.unlinkSync(avatarTwo);
     
     return pathImg;
 }
@@ -69,27 +71,20 @@ module.exports.run = async function ({ event, api, args }) {
     const fs = global.nodemodule["fs-extra"];
     const { threadID, messageID, senderID } = event;
     
-    // Check if mention OR reply
     const mention = Object.keys(event.mentions);
     const replyID = event.messageReply ? event.messageReply.senderID : null;
 
-    let targetID;
+    const targetID = mention[0] || replyID;
 
-    if (mention.length > 0) {
-        targetID = mention[0];
-    } else if (replyID) {
-        targetID = replyID;
-    } else {
+    if (!targetID) {
         return api.sendMessage("❌ Please kisi ko mention karo ya phir kisi ke message par reply karo.", threadID, messageID);
     }
 
-    const one = senderID;
-    const two = targetID;
-    
-    return makeImage({ one, two }).then(path => 
-        api.sendMessage({ body: "♥️♥️♥️", attachment: fs.createReadStream(path) }, threadID, () => fs.unlinkSync(path), messageID)
-    ).catch(e => {
-        console.log(e);
-        api.sendMessage("Error a raha hai, shayad user ki profile private hai.", threadID, messageID);
-    });
+    try {
+        const path = await makeImage({ one: senderID, two: targetID });
+        api.sendMessage({ attachment: fs.createReadStream(path) }, threadID, () => fs.unlinkSync(path), messageID);
+    } catch (e) {
+        console.error("Error in Fram Command:", e);
+        api.sendMessage("❌ Error: Image nahi ban payi. Shayad ID invalid hai ya API limit khatam ho gayi hai.", threadID, messageID);
+    }
 }
